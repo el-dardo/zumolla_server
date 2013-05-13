@@ -1,0 +1,29 @@
+[:page args="DateTime id,Month data" partOf="views"]
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Mes: [=id.month]/[=id.year]
+    </title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body class="monthView">
+    
+    <h1>Mes: [=id.month]/[=id.year]</h1>
+
+    <table cellpadding="0" cellspacing="0">
+      [:for day=0; day<data.numberOfDays; day++ ]
+        <tr>
+          <td class="dayOfMonth">[=_DAY_OF_WEEK[(data.firstDayOfWeek-1+day)%_DAY_OF_WEEK.length]]</td>
+          <td class="hours">[=day+1]</td>
+        </tr>
+      [/for]      
+    </table> 
+    
+    <p id="switchToJson">Switch to JSON view</p>
+
+    <script type="application/dart" src="/client/month_view.dart"></script>
+    <script src="/packages/browser/dart.js"></script>
+
+  </body>
+</html>

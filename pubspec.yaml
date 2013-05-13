@@ -1,0 +1,16 @@
+name: zumolla_server
+version: 0.1.0
+author: www.eldardo.org
+description: "A web server based on Rikulo Stream which serves resources in a REST\
+  \ fashion following the MVC pattern. \n\nCurrently only contents in HTML and JSON\
+  \ are supported."
+homepage: https://github.com/el-dardo/zumolla_server
+dependencies:
+  stream: any
+  json_object: any
+  intl: any
+dev_dependencies:
+  unittest: any
+
+#dependencies:
+#  unittest: any

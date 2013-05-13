@@ -1,0 +1,23 @@
+body {
+  font-family: sans-serif; 
+}
+
+.monthView h1 {
+  font-size: 14pt;
+}
+
+.monthView table {
+  width: 90pt;
+  border-top: 1px solid silver;
+}
+
+.monthView td {
+  border-bottom: 1px solid silver;
+}
+
+#switchToJson {
+  margin-top: 1em;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
