@@ -1,0 +1,37 @@
+[:page args="List<Author> authors" partOf="views"]
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Autores 
+    </title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body class="authorsView">
+    
+    <h1>Autores</h1>
+    
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Surname</th>
+        <th>E-mail</th>
+        <th>More info</th>
+      </tr>
+      [:for author in authors]
+        <tr>
+          <td class="name">[=author.name]</td>
+          <td class="surname">[=author.surname]</td>
+          <td class="email">[=author.email]</td>
+          <td class="moreInfoLink">[=author.moreInfoLink]</td>
+        </tr>
+      [/for]
+    </table>
+     
+    <!--
+    <script type="application/dart" src="/client/authors_view.dart"></script>
+    <script src="/packages/browser/dart.js"></script>
+    -->
+
+  </body>
+</html>

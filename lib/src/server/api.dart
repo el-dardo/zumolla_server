@@ -1,21 +1,12 @@
 part of zumolla_server;
 
+/** Callback method to be called to configure the [Server] */
 typedef void ServerConfigurator( Server server );
 
-abstract class Server {
-  set port( int port );
-  void addController( Controller controller );
-}
-
-abstract class Request {
-  Uri get uri;
-  Response get response;
-}
-
-abstract class Response implements IOSink {
-  Future renderStreamView( Future render(connect) );
-}
-
+/**
+ * Start zumolla server using [homeDir] as context root and [configurator] as
+ * callback configuration function.
+ */
 Future startServer( String homeDir, ServerConfigurator configurator ) {
   Completer completer = new Completer();
   
@@ -30,4 +21,30 @@ Future startServer( String homeDir, ServerConfigurator configurator ) {
   
   return completer.future;
 }
+
+/** Interface exported by the server */
+abstract class Server {
+  ControllersMap get controllers;
+  set port( int port );
+}
+
+/** Interface exported by zumolla server requests */
+abstract class Request implements HttpRequest {
+  
+  /** 
+   * Returns the Rikulo Stream [HttpConnect] object to be able to render RSP 
+   * views. This method can return null if zumolla server is implemented with
+   * a different underlying technology. 
+   */
+  dynamic get connect;
+  
+  /** Get the [Response] associated to this [Request] */
+  Response get response;
+}
+
+/** Interface exported by zumolla server responses */
+abstract class Response implements HttpResponse {
+  Future renderStreamView( Future render(connect) );
+}
+
 

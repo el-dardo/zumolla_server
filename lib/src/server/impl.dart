@@ -1,41 +1,114 @@
 part of zumolla_server;
 
+/** The global zumolla server object */
 var _server;
 
-typedef Future _StreamServerHandler( HttpConnect connect );
-
+/**
+ * Implementation of interface [Server] using Rikulo Stream server.
+ */
 class _Server implements Server {
   
   StreamServer _server;
+  ControllersMap _controllers;
   
-  _Server(this._server);
+  _Server(this._server) {
+    _controllers = new _ServerControllersMap(this);
+  }
+  
+  ControllersMap get controllers => _controllers;
 
   set port( int port ) {
     _server.port = port;
   }
+
+  void _mapController( String childUri, Controller child) {
+    var uri = child.managesChildren ? "/${childUri}.*" : "/${childUri}"; 
+    _server.map( uri, (HttpConnect connect) => _handleRequest(connect,child) );
+  }
   
-  void addController( Controller controller ) {
-    for( var uri in controller.uris ) {
-      _server.map( uri, new _ControllerRouter(controller).streamServerHandler );
+  Future _handleRequest( HttpConnect connect, Controller rootController ) {
+    var controller = _findController( connect.request.uri, rootController );
+    if( controller==null ) {
+      connect.response.statusCode = HttpStatus.NOT_FOUND;
+      return new Future.value();
+    } else {
+      return _routeRequest( connect, controller );
     }
   }
   
+  Future _routeRequest( HttpConnect connect, Controller controller) {
+    var request = new _Request(connect);
+    return controller.parse(request).then( (input) {
+      var method = connect.request.queryParameters["__http-method"];
+      if( method==null ) {
+        method = request.method;
+      }
+      switch( method ) {
+        case "GET": return controller.get(request);  
+        case "POST": return controller.post(request,input);  
+        case "PUT": return controller.put(request,input); 
+        case "DELETE": return controller.delete(request); 
+        case "HEAD": return controller.head(request); 
+        case "OPTIONS": return controller.options(request); 
+      }
+    });
+  }
+
+  Controller _findController(Uri uri, Controller rootController) {
+    var controller = rootController;
+    var nodes = uri.path.split("/");
+    for( var i=2 ; i<nodes.length && controller!=null ; i++ ) {
+      controller = controller.children[nodes[i]];
+    }
+    return controller;
+  }
+
 }
 
-class _Request<ID> implements Request {
+/**
+ * A class to hold the map of root controllers for a [_Server]
+ */
+class _ServerControllersMap extends StaticControllersMap {
+
+  _Server _server;
+  
+  _ServerControllersMap(this._server);
+  
+  operator []=( String childUri, Controller child ) {
+      _server._mapController(childUri,child);
+      return super[childUri] = child;
+  }
+
+}
+
+/**
+ * An implementation of [Request] that wraps the original [HttpConnect] object
+ * from Rikulo Stream.
+ */
+class _Request implements Request {
   
   final HttpConnect _connect;
   _Response _response;
+  InstanceMirror _delegate;
   
   _Request(this._connect) {
     _response = new _Response(this);
+    _delegate = reflect(_connect.request);
   }
-  
-  Uri get uri => _connect.request.uri;
+
+  dynamic get connect => _connect;
+
   Response get response => _response;
   
+  noSuchMethod( Invocation invocation ) {
+    return _delegate.delegate(invocation);
+  }
 }
 
+/**
+ * An implementation of [Response] that wraps the original [HttpConnect] object
+ * from Rikulo Stream.
+ */
 class _Response implements Response {
   
   _Request _request;
@@ -53,111 +126,5 @@ class _Response implements Response {
     return _delegate.delegate(invocation);
   }
 
-}
-
-// TODO: routing por defecto y errores
-class _ControllerRouter<T extends RestEntity,ID> {
-
-  Controller<T,ID> _controller;
-  
-  _ControllerRouter(this._controller);
-
-  _StreamServerHandler get streamServerHandler => (HttpConnect connect) => _handle(connect);
-
-  ///////
-  Future _handle( HttpConnect connect ) {
-    var id = _controller.getId(connect.request.uri);
-    return _parseRequest(connect).then( (data) {
-      return _process(connect,id,data);
-    }).then( (response) {
-      return _render(connect,response);
-    });
-  }
-  
-  ///////
-  // TODO: simulate body from query parameters
-  Future<T> _parseRequest( HttpConnect connect ) {
-    var contentType = _getContentType(connect);
-    switch( connect.request.method ) {
-      case "PUT": 
-      case "POST":
-        return IOUtil.readAsString( connect.request ).then( (body) {
-          switch( contentType ) {
-            case "application/json": return _controller.parseJsonRequest(body);
-            //case "application/xml":
-            //case "www/url-enconded":
-          }
-          return new Future.error( new UnsupportedError("Unsupported content type: ${contentType}") );
-        });
-    }
-    return new Future.value(null);
-  }
-  
-  ///////
-  Future _process(HttpConnect connect, ID id, T data) {
-    switch( connect.request.method ) {
-      case "PUT": return _controller.processPut(id,data);
-      case "POST": return _controller.processPost(data);
-      case "DELETE": return _controller.processDelete(id);
-      case "GET": return _controller.processGet(id);
-    }
-  }
-  
-  ///////
-  Future _render(HttpConnect connect, dynamic response) {
-    switch( connect.request.method ) {
-      case "POST": return _renderId(connect,response);
-      case "GET": return _renderEntity(connect,response);
-    }
-  }
-
-  Future _renderId(HttpConnect connect, ID id) {
-    var request = new _Request(connect);
-    // TODO: set content type and encoding
-    var accept = _getAccept(connect);
-    switch( accept ) {
-      case "application/json": return _controller.renderJsonIdResponse(request,id);
-      case "text/html": return _controller.renderHtmlIdResponse(request,id);
-    }
-  }
-
-  Future _renderEntity(HttpConnect connect, T data) {
-    var request = new _Request(connect);
-    // TODO: set content type and encoding
-    var accept = _getAccept(connect);
-    switch( accept ) {
-      case "application/json": return _controller.renderJsonEntityResponse(request,data);
-      case "text/html": return _controller.renderHtmlEntityResponse(request,data);
-    }
-  }
-
-  ///////
-  String _getContentType(HttpConnect connect) {
-    var contentType = connect.request.queryParameters[HttpHeaders.CONTENT_TYPE];
-    if( contentType==null ) {
-      var headers = connect.request.headers[HttpHeaders.CONTENT_TYPE];
-      if( headers!=null ) {
-        contentType = headers[0];
-      }
-    }
-    return contentType;  
-  }
-
-  String _getAccept(HttpConnect connect) {
-    var accept = connect.request.queryParameters[HttpHeaders.ACCEPT];
-    if( accept==null ) {
-      var accepts = connect.request.headers[HttpHeaders.ACCEPT];
-      if( accepts==null ) {
-        accept = (accept==null) ? "text/html" : accept;
-      } else {
-        accept = accepts[0];
-        var i = accept.indexOf(",");
-        if( i!=-1 ) {
-          accept = accept.substring(0, i);
-        }
-      }
-    }
-    return accept;
-  }
 }
 

@@ -1,10 +1,21 @@
 part of zumolla_rest;
 
-abstract class RestEntity extends JsonObject {
+/** 
+ * Interface to be implemented by all REST entities 
+ */
+abstract class RestEntity {
+  /** The unique id of the entity */
+  String id;
+}
+
+/**
+ * A base implementation of [RestEntity] based on [JsonObject]
+ */
+abstract class DefaultRestEntity extends JsonObject implements RestEntity {
+
+  DefaultRestEntity();
   
-  RestEntity();
-  
-  factory RestEntity.fromJson( String json, RestEntity instance ) => 
-      new JsonObject.fromJsonString( json, instance );
-  
+  factory DefaultRestEntity.fromJson( String json, DefaultRestEntity instance ) => 
+      new JsonObject.fromJsonString( json, instance )..isExtendable=true;
+
 }

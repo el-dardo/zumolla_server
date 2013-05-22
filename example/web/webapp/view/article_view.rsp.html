@@ -1,0 +1,30 @@
+[:page args="String articleId,Article article" partOf="views"]
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      [=article.title]
+    </title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body class="articleView">
+    
+    <h1>[=article.title]</h1>
+    
+    <div class="intro">[=article.intro]</div>
+    <div class="content">[=article.content]</div>
+    <div class="author">
+      <div class="tag">Información del autor</div>
+      <div class="name">[=article.author.name]</div>
+      <div class="surname">[=article.author.surname]</div>
+      <div class="email">[=article.author.email]</div>
+      <div class="moreInfoLink">[=article.author.moreInfoLink]</div>
+    </div>
+
+    <!--
+    <script type="application/dart" src="/client/article_view.dart"></script>
+    <script src="/packages/browser/dart.js"></script>
+    -->
+
+  </body>
+</html>

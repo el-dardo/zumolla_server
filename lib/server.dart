@@ -6,7 +6,7 @@ import "dart:io";
 import "dart:async";
 import "package:stream/stream.dart";
 import "package:rikulo_commons/io.dart";
-import "./controller.dart";
+import "package:zumolla_server/controller.dart";
 
 part "./src/server/api.dart";
 part "./src/server/impl.dart";

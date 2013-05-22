@@ -1,0 +1,23 @@
+[:page args="Author author" partOf="views"]
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      [=author.name] [=author.surname] 
+    </title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body class="authorView">
+    
+    <h1>[=author.name] [=author.surname]</h1>
+    
+    <div class="email">[=author.email]</div>
+    <div class="moreInfoLink">[=author.moreInfoLink]</div>
+
+    <!--
+    <script type="application/dart" src="/client/author_view.dart"></script>
+    <script src="/packages/browser/dart.js"></script>
+    -->
+
+  </body>
+</html>

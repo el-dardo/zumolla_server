@@ -15,9 +15,6 @@ body {
   border-bottom: 1px solid silver;
 }
 
-#switchToJson {
-  margin-top: 1em;
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
+.authorsView table {
+  border: 1px solid gray;
 }
