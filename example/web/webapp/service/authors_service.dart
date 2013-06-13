@@ -20,37 +20,19 @@ class AuthorsService implements Service<Author> {
       ..moreInfoLink = "http://es.linkedin.com/cervantes";
   }
   
-  Future<Author> parse( String contentType, String body ) => new Future.sync( () {
-    switch( contentType ) {
-      case "application/json": return new Author.fromJson( body ); 
-      // TODO: support xml and www/url-encoded
-//      case "application/xml":
-//      case "www/url-encoded":
-    }
-  });
-  
-  Future<Author> newInstance( Map<String,String> params ) => new Future.sync( () {
-    Author author = new Author();
-    author.name = params["name"];
-    return author;
-  });
-  
   Future<String> create( Author obj ) => new Future.sync( () {
       obj.id = _nextId.toString();
       _db[_nextId.toString()] = obj;
       return (_nextId++).toString();
   });
   
-  Future<List<Author>> find( Map<String,String> criteria, {Set<String> fetch} ) => new Future.sync( () {
+  Future<Author> getById( String id, {Set<String> fetch} ) => new Future.sync( () {
+    return _db[id];
+  });
+  
+  Future<List<Author>> findAll( {Set<String> fetch} ) => new Future.sync( () {
     var list = new List<Author>();
-    if( criteria.containsKey("id") ) {
-      var obj = _db[criteria["id"]];
-      if( obj!=null ) {
-        list.add( obj );
-      }
-    } else {
-      list.addAll( _db.values );
-    }
+    list.addAll( _db.values );
     return list;
   });
   

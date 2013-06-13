@@ -1,0 +1,28 @@
+[:page args="List<Article> articles" import="../json/entities.dart"]
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Artículos 
+    </title>
+    <link href="/styles.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body class="articlesView">
+    
+    <h1>Artículos</h1>
+        
+    [:for article in articles]
+      <div class="title">[=article.title]</div>
+      <div class="author">[=article.author.fullName]</div>
+      <div class="intro">[=article.intro]</div>
+      <div class="content">[=article.content]</div>
+      <hr/>
+    [/for]
+     
+    <!--
+    <script type="application/dart" src="/client/authors_view.dart"></script>
+    <script src="/packages/browser/dart.js"></script>
+    -->
+
+  </body>
+</html>
