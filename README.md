@@ -1,4 +1,6 @@
 zumolla_server
 ==============
 
-A web server based on Rikulo Stream which serves resources in a REST fashion following the MVC pattern
+A server layer on top of Rikulo Stream which lets user implement specialized 
+controllers like servlets, JSON, JSON CRUD by extending the corresponding base 
+class.
