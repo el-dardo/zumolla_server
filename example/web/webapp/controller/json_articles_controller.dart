@@ -18,9 +18,14 @@ class JsonArticlesController extends JsonController<Article> {
   Future<Article> parse( String contentType, String body ) 
     => new Future.value( new Article.fromJson(body) );
 
-  Future get( HttpConnect connect ) 
-    => _service.findAll().then( (articles)
+  Future get( HttpConnect connect ) {
+    var fetch = connect.request.uri.queryParameters["_fetch"];
+    if( fetch!=null ) {
+      fetch = new Set.from(fetch.split(","));  
+    }
+    return _service.findAll( fetch:fetch ).then( (articles)
         => renderJsonObject( connect, articles ) );
+  }
   
   Future post( HttpConnect connect, Article input ) 
     => _service.create(input);

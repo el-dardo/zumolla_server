@@ -2,13 +2,15 @@ part of services;
 
 class ArticlesService implements Service<Article> {
   
+  final AuthorsService _authorsService;
+  
   Map<String,Article> _db = new Map<String,Article>();
   int _nextId = 1;
 
-  ArticlesService( AuthorsService authorsService ) {
+  ArticlesService( this._authorsService ) {
     _db["A"] = new Article()
       ..id = "A"
-      ..author = authorsService._db["A"]
+      ..author = _authorsService._db["A"]
       ..title = "La cría del berberecho salvaje"
       ..intro = "En este artículo explicaremos como se cría el berberecho salvaje, tanto en libertad como en cautividad."
       ..content = "Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum "
@@ -23,11 +25,17 @@ class ArticlesService implements Service<Article> {
 
   }
   
-  Future<String> create( Article obj ) => new Future.sync( () {
-      obj.id = _nextId.toString();
-      _db[_nextId.toString()] = obj;
-      return (_nextId++).toString();
-  });
+  Future<String> create( Article obj ) 
+    => _authorsService.getById( obj.author.id ).then( (author) {
+      if( author==null ) {
+        throw "Invalid author id: "+obj.author.id;        
+      } else {
+        obj.id = _nextId.toString();
+        obj.author = author;
+        _db[_nextId.toString()] = obj;
+        return (_nextId++).toString();
+      }
+    });
   
   Future<Article> getById( String id, {Set<String> fetch} ) => new Future.sync( () {
     return _db[id];
