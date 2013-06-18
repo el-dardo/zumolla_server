@@ -1,4 +1,4 @@
-part of rest;
+part of json_entities;
 
 abstract class AuthorFields implements HasIdField {
   String name;

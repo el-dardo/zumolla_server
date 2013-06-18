@@ -1,4 +1,4 @@
-library rest;
+library json_entities;
 
 import "dart:json" show stringify;
 import "package:zumolla_server/json.dart";
